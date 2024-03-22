@@ -5,11 +5,11 @@ const todos = new Todos(BACKEND_ROOT_URL);
 
 const list = document.querySelector('ul');
 const input = document.querySelector('input');
+const addButton = document.querySelector('button[type="submit"]'); // Select the submit button
 
 input.disabled = false;
 
 const renderTask = (task) => {
-  console.log(task);
   const li = document.createElement('li');
   li.setAttribute('class', 'list-group-item');
   li.setAttribute('data-key', task.getId().toString());
@@ -48,7 +48,6 @@ const getTasks = async () => {
   todos
     .getTasks()
     .then((tasks) => {
-      console.log(tasks);
       tasks.forEach((task) => {
         renderTask(task);
       });
@@ -58,20 +57,10 @@ const getTasks = async () => {
     });
 };
 
-const saveTask = async (task) => {
-  try {
-    const json = JSON.stringify({ description: task });
-    const response = await fetch(BACKEND_ROOT_URL + '/new', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json,
-    });
-    return response.json();
-  } catch (error) {
-    alert('Error saving task ' + error.message);
-  }
+const addTask = (taskDescription) => {
+  todos.addTask(taskDescription).then((task) => {
+    renderTask(task);
+  });
 };
 
 input.addEventListener('keypress', (event) => {
@@ -79,12 +68,21 @@ input.addEventListener('keypress', (event) => {
     event.preventDefault();
     const task = input.value.trim();
     if (task !== '') {
-      todos.addTask(task).then((task) => {
-        renderTask(task);
-        input.value = '';
-        input.focus();
-      });
+      addTask(task);
+      input.value = '';
+      input.focus();
     }
+  }
+});
+
+// Add event listener to the submit button
+addButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  const task = input.value.trim();
+  if (task !== '') {
+    addTask(task);
+    input.value = '';
+    input.focus();
   }
 });
 
